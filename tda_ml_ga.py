@@ -785,7 +785,7 @@ for dim in range(3):
         if current_vmax == 0:
             current_vmax = 0.001 
             
-        im = ax.imshow(img, origin='lower', cmap=colormaps[dim], vmin=0, vmax=current_vmax)
+        im = ax.imshow(img.T, origin='lower', cmap=colormaps[dim], vmin=0, vmax=current_vmax)
         ax.grid(True, color='white', linestyle='-', alpha=0.8, linewidth=0.5, zorder=2)
         
         if dim == 0:
