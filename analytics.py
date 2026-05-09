@@ -15,7 +15,7 @@ import seaborn as sns
 from matplotlib.patches import Patch
 
 
-# filename = ["ga_comprehensive_results_v3.pkl", 1]
+# filename = ["results_test_function_1.pkl", 1]
 filename = ["results_test_function_2.pkl", 2]
 
 
