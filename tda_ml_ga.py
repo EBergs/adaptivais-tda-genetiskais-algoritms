@@ -91,7 +91,7 @@ def sus_minimization(individuals, k):
     for p in pointers:
         while current_sum < p:
             i += 1
-            # Drošības mehānisms pret peldošā komata (float) noapaļošanas kļūdām
+            # Drošības mehānisms pret peldošā punkta (float) noapaļošanas kļūdām
             if i >= len(individuals):
                 i = len(individuals) - 1
                 break
@@ -118,7 +118,7 @@ toolbox.register("evaluate_sphere", sphere)
 toolbox.register("evaluate_rastrigin", rastrigin)
 toolbox.register("evaluate_rosenbrock", rosenbrock)
 toolbox.register("evaluate_michalewicz", michalewicz)
-toolbox.register("posite", composite_function_2)
+toolbox.register("composite", composite_function_2)
 toolbox.register("select", sus_minimization)
 toolbox.register("mate", tools.cxUniform, indpb=0.5)
 toolbox.register("mutate", mutUniformFloat, low=-5.12, up=5.12, indpb=0.1)
@@ -127,139 +127,139 @@ toolbox.register("mutate", mutUniformFloat, low=-5.12, up=5.12, indpb=0.1)
 # 2. POSMS: STĀVOKĻU DATU KOPU ĢENERĒŠANA
 # ==========================================
 
-# def generate_state_data(state_type, function, gen, seed_val):
-#     random.seed(seed_val)
-#     pop = toolbox.population(n=POP_SIZE)
+def generate_state_data(state_type, function, gen, seed_val):
+    random.seed(seed_val)
+    pop = toolbox.population(n=POP_SIZE)
     
-#     if state_type == "healthy":
-#         cxpb, mutpb = 0.7, 0.05
-#         target_gen = gen
-#     elif state_type == "premature":
-#         cxpb, mutpb = 0.7, 0.001
-#         target_gen = "stagnation_50"
-#     elif state_type == "wandering":
-#         cxpb, mutpb = 0.1, 0.9
-#         target_gen = 10
+    if state_type == "healthy":
+        cxpb, mutpb = 0.7, 0.05
+        target_gen = gen
+    elif state_type == "premature":
+        cxpb, mutpb = 0.7, 0.001
+        target_gen = "stagnation_50"
+    elif state_type == "wandering":
+        cxpb, mutpb = 0.1, 0.9
+        target_gen = 10
         
-#     if function == "sphere":
-#         fitnesses = list(map(toolbox.evaluate_sphere, pop))
-#     elif function == "rastrigin":
-#         fitnesses = list(map(toolbox.evaluate_rastrigin, pop))
-#     elif function == "rosenbrock":
-#         fitnesses = list(map(toolbox.evaluate_rosenbrock, pop))
-#     else:
-#         fitnesses = list(map(toolbox.evaluate_michalewicz, pop))
+    if function == "sphere":
+        fitnesses = list(map(toolbox.evaluate_sphere, pop))
+    elif function == "rastrigin":
+        fitnesses = list(map(toolbox.evaluate_rastrigin, pop))
+    elif function == "rosenbrock":
+        fitnesses = list(map(toolbox.evaluate_rosenbrock, pop))
+    else:
+        fitnesses = list(map(toolbox.evaluate_michalewicz, pop))
         
-#     for ind, fit in zip(pop, fitnesses):
-#         ind.fitness.values = fit
+    for ind, fit in zip(pop, fitnesses):
+        ind.fitness.values = fit
         
     
-#     stagnation_counter = 0
-#     best_fitness_history = []
+    stagnation_counter = 0
+    best_fitness_history = []
     
-#     gen = 0
-#     while True:
-#         # Fiksēt labāko derīguma vērtību šajā paaudzē
-#         current_best = tools.selBest(pop, 1)[0].fitness.values[0]
+    gen = 0
+    while True:
+        # Fiksēt labāko derīguma vērtību šajā paaudzē
+        current_best = tools.selBest(pop, 1)[0].fitness.values[0]
         
-#         # Pārbaudīt apstāšanās kritērijus pirms jaunas paaudzes ģenerēšanas
-#         if target_gen == "stagnation_50":
-#             if len(best_fitness_history) > 0 and current_best >= best_fitness_history[-1]:
-#                 stagnation_counter += 1
-#             else:
-#                 stagnation_counter = 0
+        # Apstāšanās kritēriju pārbaude pirms jaunas paaudzes ģenerēšanas
+        if target_gen == "stagnation_50":
+            if len(best_fitness_history) > 0 and current_best >= best_fitness_history[-1]:
+                stagnation_counter += 1
+            else:
+                stagnation_counter = 0
                 
-#             if stagnation_counter >= 50:
-#                 break # Iestājusies pāragra konverģence
-#         else:
-#             if gen == target_gen:
-#                 break # Sasniegta noteiktā apstāšanās paaudze
+            if stagnation_counter >= 50:
+                break # Iestājusies pāragra konverģence
+        else:
+            if gen == target_gen:
+                break # Sasniegta noteiktā apstāšanās paaudze
 
-#         best_fitness_history.append(current_best)
+        best_fitness_history.append(current_best)
 
-#         elites = list(map(toolbox.clone, tools.selBest(pop, 2)))
+        elites = list(map(toolbox.clone, tools.selBest(pop, 2)))
 
-#         offspring = toolbox.select(pop, len(pop) - 2)
-#         offspring = list(map(toolbox.clone, offspring))
+        offspring = toolbox.select(pop, len(pop) - 2)
+        offspring = list(map(toolbox.clone, offspring))
 
-#         # Krustošana
-#         for child1, child2 in zip(offspring[::2], offspring[1::2]):
-#             if random.random() < cxpb:
-#                 toolbox.mate(child1, child2)
-#                 del child1.fitness.values
-#                 del child2.fitness.values
+        # Krustošana
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            if random.random() < cxpb:
+                toolbox.mate(child1, child2)
+                del child1.fitness.values
+                del child2.fitness.values
 
-#         # Mutācija
-#         for mutant in offspring:
-#             if random.random() < mutpb:
-#                 toolbox.mutate(mutant)
-#                 del mutant.fitness.values
+        # Mutācija
+        for mutant in offspring:
+            if random.random() < mutpb:
+                toolbox.mutate(mutant)
+                del mutant.fitness.values
 
-#         # Novērtēt indivīdus, kuriem ir nomainījušies gēni
-#         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        # Novērtēt indivīdus, kuriem ir nomainījušies gēni
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         
-#         if function == "sphere":
-#             fitnesses = map(toolbox.evaluate_sphere, invalid_ind)
-#         elif function == "rastrigin":
-#             fitnesses = map(toolbox.evaluate_rastrigin, invalid_ind)
-#         elif function == "rosenbrock":
-#             fitnesses = map(toolbox.evaluate_rosenbrock, invalid_ind)
-#         else:
-#             fitnesses = map(toolbox.evaluate_michalewicz, invalid_ind)
+        if function == "sphere":
+            fitnesses = map(toolbox.evaluate_sphere, invalid_ind)
+        elif function == "rastrigin":
+            fitnesses = map(toolbox.evaluate_rastrigin, invalid_ind)
+        elif function == "rosenbrock":
+            fitnesses = map(toolbox.evaluate_rosenbrock, invalid_ind)
+        else:
+            fitnesses = map(toolbox.evaluate_michalewicz, invalid_ind)
             
-#         for ind, fit in zip(invalid_ind, fitnesses):
-#             ind.fitness.values = fit
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
 
-#         # Jaunā paaudze pilnībā aizstāj veco
-#         pop[:] = elites + offspring
-#         gen += 1
+        # Jaunā paaudze pilnībā aizstāj veco
+        pop[:] = elites + offspring
+        gen += 1
         
-#     print(best_fitness_history[-1])
+    print(best_fitness_history[-1])
 
-#     return np.array(pop)
+    return np.array(pop)
 
-# output_folder = "/Users/edijsbergholcs/Documents/point_clouds"
-# os.makedirs(output_folder, exist_ok=True)
+output_folder = "/Users/edijsbergholcs/Documents/point_clouds"
+os.makedirs(output_folder, exist_ok=True)
 
-# states = ["healthy", "premature", "wandering"]
-# functions = ["sphere", "rastrigin", "rosenbrock", "michalewicz"]
-# samples_per_func = 250 # 250 paraugi * 4 funkcijas = 1000 paraugi vienam stāvoklim
+states = ["healthy", "premature", "wandering"]
+functions = ["sphere", "rastrigin", "rosenbrock", "michalewicz"]
+samples_per_func = 250 # 250 paraugi * 4 funkcijas * 3 stāvokļi = 3000 paraugi
 
-# healthy_gens = [5, 10, 20, 50, 100]
+healthy_gens = [5, 10, 20, 50, 100]
 
-# seed_counter = 0
+seed_counter = 0
 
-# print("Uzsākta datu ģenerēšana. Tas var aizņemt laiku...")
+print("Uzsākta datu ģenerēšana. Tas var aizņemt laiku...")
 
-# for state in states:
-#     print(f"Ģenerē datus stāvoklim: {state}...")
-#     for func in functions:
+for state in states:
+    print(f"Ģenerē datus stāvoklim: {state}...")
+    for func in functions:
         
-#         # Izveidojam garantētu sadalījumu veselīgajam stāvoklim šai funkcijai
-#         # Rezultātā būs saraksts ar 250 elementiem (50 no katras paaudzes)
-#         if state == "healthy":
-#             func_target_gens = healthy_gens * (samples_per_func // len(healthy_gens))
-#             random.seed(42 + functions.index(func)) 
-#             random.shuffle(func_target_gens)
+        # Izveidojam garantētu sadalījumu veselīgajam stāvoklim šai funkcijai
+        # Rezultātā būs saraksts ar 250 elementiem (50 no katras paaudzes)
+        if state == "healthy":
+            func_target_gens = healthy_gens * (samples_per_func // len(healthy_gens))
+            random.seed(42 + functions.index(func)) 
+            random.shuffle(func_target_gens)
             
-#         for i in range(samples_per_func):
-#             current_seed = seed_counter
-#             seed_counter += 1
+        for i in range(samples_per_func):
+            current_seed = seed_counter
+            seed_counter += 1
             
-#             # Piešķiram izlozēto paaudzi no sagatavotā saraksta
-#             if state == "healthy":
-#                 target_gen = func_target_gens[i]
-#             else:
-#                 target_gen = None 
+            # Piešķiram izlozēto paaudzi no sagatavotā saraksta
+            if state == "healthy":
+                target_gen = func_target_gens[i]
+            else:
+                target_gen = None 
             
-#             point_cloud = generate_state_data(state, func, target_gen, current_seed)
+            point_cloud = generate_state_data(state, func, target_gen, current_seed)
             
-#             filename = f"{state}_{func}_{i:03d}.csv"
-#             filepath = os.path.join(output_folder, filename)
+            filename = f"{state}_{func}_{i:03d}.csv"
+            filepath = os.path.join(output_folder, filename)
             
-#             np.savetxt(filepath, point_cloud, delimiter=",", fmt="%.6f")
+            np.savetxt(filepath, point_cloud, delimiter=",", fmt="%.6f")
 
-# print(f"Datu ģenerēšana pabeigta. Visi 3000 faili saglabāti mapē '{output_folder}'.")
+print(f"Datu ģenerēšana pabeigta. Visi 3000 faili saglabāti mapē '{output_folder}'.")
 
 # ==========================================
 # 3. POSMS: TOPOLOĢISKĀ TRANSFORMĀCIJA 
@@ -362,10 +362,6 @@ def train_and_evaluate_models(X, y_text_labels, dimension_title=""):
     
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     
-    # best_model = None
-    # best_f1 = 0.0
-    # best_model_name = ""
-    
     # Vārdnīca matricu saglabāšanai pirms zīmēšanas
     saved_conf_matrices = {}
     
@@ -397,13 +393,6 @@ def train_and_evaluate_models(X, y_text_labels, dimension_title=""):
         print(f"Precizitāte: {acc:.4f}, Makro F1: {macro_f1:.4f}")
         print(f"Laiks: {elapsed_time:.2f} sekundes")
         print("-" * 40)
-        
-    #     if macro_f1 > best_f1:
-    #         best_f1 = macro_f1
-    #         best_model = model
-    #         best_model_name = name
-            
-    # print(f"\nLabākais modelis integrācijai: {best_model_name} ar Makro F1: {best_f1:.4f}")
     
     # ==========================================
     # PĀRPRATUMU MATRICU VIZUALIZĀCIJA
@@ -443,7 +432,7 @@ def adaptive_ga_cycle(best_ml_model, scaler, label_encoder, toolbox, adaptation_
     random.seed(seed_val)
     pop = toolbox.population(n=POP_SIZE)
     
-    fitnesses = list(map(toolbox.posite, pop))
+    fitnesses = list(map(toolbox.composite, pop))
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
         
@@ -524,7 +513,7 @@ def adaptive_ga_cycle(best_ml_model, scaler, label_encoder, toolbox, adaptation_
         # ==========================================
         if adaptation_strategy == "literature_aga":
             fits = [ind.fitness.values[0] for ind in pop]
-            f_min = min(fits) # Labākā vērtība minimizācijā
+            f_min = min(fits)
             f_avg = sum(fits) / len(fits)
             k1, k3 = 1.0, 1.0 # AGA Krustošanās konstantes
             k2, k4 = 0.5, 0.5 # AGA Mutācijas konstantes
@@ -536,7 +525,7 @@ def adaptive_ga_cycle(best_ml_model, scaler, label_encoder, toolbox, adaptation_
         offspring = toolbox.select(pop, len(pop) - 2)
         offspring = list(map(toolbox.clone, offspring))
 
-        # Saglabājam vecāku derīgumu, jo krustošana to izdzēsīs
+        # Saglabā vecāku derīgumu, jo krustošana to izdzēsīs
         parent_fitness = {id(ind): ind.fitness.values[0] for ind in offspring}
 
         # Krustošana
@@ -571,7 +560,7 @@ def adaptive_ga_cycle(best_ml_model, scaler, label_encoder, toolbox, adaptation_
                 del mutant.fitness.values
 
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(toolbox.posite, invalid_ind)
+        fitnesses = map(toolbox.composite, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
@@ -590,7 +579,7 @@ num_runs = 100
 adaptive_strategies = ["static", "incremental", "hybrid"]
 comprehensive_results = {}
 
-print("=== UZSĀKTA PAPLAŠINĀTĀ TESTĒŠANA ===")
+print("=== UZSĀKTA TESTĒŠANA ===")
 print("1. Izpilda bāzes GA ...")
 
 baseline_fitness, baseline_gens, baseline_times, baseline_mutation, baseline_crossover, baseline_state, baseline_fitnesses = [], [], [], [], [], [], []
@@ -711,7 +700,7 @@ print("\n=== VISI CIKLI VEIKSMĪGI PABEIGTI ===")
 # REZULTĀTU KOPSAVILKUMS
 # ==========================================
 print("\n" + "="*85)
-print(f"{'GALĪGAIS PAPLAŠINĀTĀS TESTĒŠANAS KOPSAVILKUMS':^85}")
+print(f"{'GALĪGAIS TESTĒŠANAS KOPSAVILKUMS':^85}")
 print("="*85)
 
 print("\n[ KLASISKĀS METODES (Bez TDA) ]")
